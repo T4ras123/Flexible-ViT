@@ -1,4 +1,4 @@
-# Implement-16x16-ViT-Paper
+# Flexible Vision Transformer
 
 This repository contains an implementation of the Vision Transformer (ViT) model as described in the paper by [Dosovitskiy et al. 2021](https://arxiv.org/abs/2010.11929v2).
 
