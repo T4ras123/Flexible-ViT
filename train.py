@@ -57,7 +57,7 @@ class Block(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.sa = MultiHeadAttention(num_heads, head_size)
-        self.ffwd = FeedForward(D)
+        self.ffwd = FeedForward()
         self.ln1 = nn.LayerNorm(D)
         self.ln2 = nn.LayerNorm(D)
 
@@ -118,17 +118,19 @@ class FeedForward(nn.Module):
         out = ix + self.lin2(out)
         return out
     
+
+-if __name__=='__main__':
+
+    model = VisionTransformer()
+
+    optimizer = torch.optim.Adam(model.parameters, lr=lr)
+
+    xb, yb = 0,0 # for lack of actual data
+
+    for _ in range(max_iters):
     
-model = VisionTransformer()
-
-optimizer = torch.optim.Adam(model.parameters, lr=lr)
-
-xb, yb = 0,0 # for lack of actual data
-
-for _ in range(max_iters):
-    
-    logits ,loss = model(xb, yb)
-    optimizer.zero_grad(set_to_none=True)
-    loss.backward()
-    optimizer.step()
+        logits ,loss = model(xb, yb)
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
     
