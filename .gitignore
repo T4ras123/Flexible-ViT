@@ -2,3 +2,4 @@
 /Imagenet32_val
 /tiny-imagenet-200
 scratch.ipynb
+notebooks/oxford-iiit-pet/*
