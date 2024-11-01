@@ -8,7 +8,11 @@ from random import random
 from torchvision.transforms import Resize, ToTensor
 from torchvision.transforms.functional import to_pil_image
 from einops import repeat
-
+from torch.utils.data import DataLoader
+from torch.utils.data import random_split
+import torch.optim as optim
+import numpy as np
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 to_tensor = [Resize((144,144)), ToTensor()]
 
@@ -31,9 +35,15 @@ def show_img(images, num_samples=20, columns=4):
       plt.subplot(int(num_samples/columns)+1, columns, int(i/idx)+1)
       plt.imshow(to_pil_image(img[0]))
   
-  
+print("data")
 dataset = OxfordIIITPet(root=".", download=True, transform=Compose(to_tensor))
 
+train_split = int(0.8 * len(dataset))
+train, test = random_split(dataset, [train_split, len(dataset) - train_split])
+
+train_dataloader = DataLoader(train, batch_size=32, shuffle=True)
+test_dataloader = DataLoader(test, batch_size=32, shuffle=True)
+print("loader")
 
 class PatchEmbedding(nn.Module):
   def __init__(self, in_channels=3, patch_size = 8, emb_size = 128):
@@ -66,7 +76,7 @@ class Block(nn.Module):
 
 
 class Attention(nn.Module):
-  def __init__(self, dim, n_heads, dropout) -> None:
+  def __init__(self, dim=32, n_heads=2, dropout=0.1) -> None:
     super().__init__()
     self.n_heads = n_heads
     self.att = torch.nn.MultiheadAttention(
@@ -86,7 +96,7 @@ class Attention(nn.Module):
     return attn_output
 
 class FeedForward(nn.Sequential):
-    def __init__(self, dim, hidden_dim, dropout = 0.):
+    def __init__(self, dim=32, hidden_dim=128, dropout = 0.):
         super().__init__(
             nn.Linear(dim, hidden_dim),
             nn.GELU(),
@@ -127,3 +137,37 @@ class ViT(nn.Module):
         x = self.layers[i](x)
 
     return self.head(x[:, 0, :])
+
+
+def main():
+    model = ViT().to(device)
+    optimizer = optim.AdamW(model.parameters(), lr=0.001)
+    criterion = nn.CrossEntropyLoss()
+    print("main")
+    for epoch in range(1000):
+        epoch_losses = []
+        model.train()
+        for step, (inputs, labels) in enumerate(train_dataloader):
+            inputs, labels = inputs.to(device), labels.to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            epoch_losses.append(loss.item())
+            print(loss)
+            break
+        
+        if epoch % 5 == 0:
+            print(f">>> Epoch {epoch} train loss: ", np.mean(epoch_losses))
+            epoch_losses = []
+            for step, (inputs, labels) in enumerate(test_dataloader):
+                inputs, labels = inputs.to(device), labels.to(device)
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                epoch_losses.append(loss.item())
+            print(f">>> Epoch {epoch} test loss: ", np.mean(epoch_losses))
+
+
+if __name__=='__main__':
+    main()
