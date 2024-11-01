@@ -133,8 +133,7 @@ class ViT(nn.Module):
     x = torch.cat([cls_tokens, x], dim=1)
     x += self.pos_embedding[:, :(n + 1)]
 
-    for i in range(self.n_layers):
-        x = self.layers[i](x)
+    x = self.blocks(x)
 
     return self.head(x[:, 0, :])
 
