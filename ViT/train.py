@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 import torch.optim as optim
 import numpy as np
+import argparse
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 to_tensor = [Resize((144,144)), ToTensor()]
@@ -44,6 +45,7 @@ train, test = random_split(dataset, [train_split, len(dataset) - train_split])
 train_dataloader = DataLoader(train, batch_size=32, shuffle=True)
 test_dataloader = DataLoader(test, batch_size=32, shuffle=True)
 print("loader")
+
 
 class PatchEmbedding(nn.Module):
   def __init__(self, in_channels=3, patch_size = 8, emb_size = 128):
@@ -139,11 +141,24 @@ class ViT(nn.Module):
 
 
 def main():
-  model = ViT().to(device)
-  optimizer = optim.AdamW(model.parameters(), lr=0.001)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-ch', '--channels', type=int, default=3, help='Number of channels in the input image')
+  parser.add_argument('-ims', '--image_size', type=int, default=144, help='Size of the input image')
+  parser.add_argument('-ps', '--patch_size', type=int, default=4, help='Size of the patch')
+  parser.add_argument('-emd', '--emb_dim', type=int, default=32, help='Embedding dimension')
+  parser.add_argument('-nl', '--n_layers', type=int, default=6, help='Number of layers')
+  parser.add_argument('-od', '--out_dim', type=int, default=37, help='Output dimension')
+  parser.add_argument('-dr', '--dropout', type=float, default=0.1, help='Dropout')
+  parser.add_argument('-nh', '--heads', type=int, default=2, help='Number of heads')
+  parser.add_argument('-lr', '--learning_rate', type=float, default=0.001, help='Learning rate')
+  parser.add_argument('--epochs', type=int, default=1000, help='Number of epochs')
+  args = parser.parse_args()
+  
+  model = ViT(args.channels, args.image_size, args.patch_size, args.emb_dim, args.n_layers, args.out_dim, args.dropout, args.heads).to(device)
+  optimizer = optim.AdamW(model.parameters(), lr=args.learning_rate)
   criterion = nn.CrossEntropyLoss()
   print("main")
-  for epoch in range(1000):
+  for epoch in range(args.epochs):
       epoch_losses = []
       model.train()
       for step, (inputs, labels) in enumerate(train_dataloader):
