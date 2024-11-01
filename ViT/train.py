@@ -135,7 +135,7 @@ class ViT(nn.Module):
 
     x = self.blocks(x)
 
-    return self.head(x[:, 0, :])
+    return self.l_head(x[:, 0, :])
 
 
 def main():
