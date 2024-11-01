@@ -139,31 +139,37 @@ class ViT(nn.Module):
 
 
 def main():
-    model = ViT().to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=0.001)
-    criterion = nn.CrossEntropyLoss()
-    print("main")
-    for epoch in range(1000):
-        epoch_losses = []
-        model.train()
-        for step, (inputs, labels) in enumerate(train_dataloader):
-            inputs, labels = inputs.to(device), labels.to(device)
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            epoch_losses.append(loss.item())
-        
-        if epoch % 5 == 0:
-            print(f">>> Epoch {epoch} train loss: ", np.mean(epoch_losses))
-            epoch_losses = []
-            for step, (inputs, labels) in enumerate(test_dataloader):
-                inputs, labels = inputs.to(device), labels.to(device)
-                outputs = model(inputs)
-                loss = criterion(outputs, labels)
-                epoch_losses.append(loss.item())
-            print(f">>> Epoch {epoch} test loss: ", np.mean(epoch_losses))
+  model = ViT().to(device)
+  optimizer = optim.AdamW(model.parameters(), lr=0.001)
+  criterion = nn.CrossEntropyLoss()
+  print("main")
+  for epoch in range(1000):
+      epoch_losses = []
+      model.train()
+      for step, (inputs, labels) in enumerate(train_dataloader):
+          inputs, labels = inputs.to(device), labels.to(device)
+          optimizer.zero_grad()
+          outputs = model(inputs)
+          loss = criterion(outputs, labels)
+          loss.backward()
+          optimizer.step()
+          epoch_losses.append(loss.item())
+      
+      if epoch % 5 == 0:
+          print(f">>> Epoch {epoch} train loss: ", np.mean(epoch_losses))
+          epoch_losses = []
+          for step, (inputs, labels) in enumerate(test_dataloader):
+              inputs, labels = inputs.to(device), labels.to(device)
+              outputs = model(inputs)
+              loss = criterion(outputs, labels)
+              epoch_losses.append(loss.item())
+          print(f">>> Epoch {epoch} test loss: ", np.mean(epoch_losses))
+  inputs, labels = next(iter(test_dataloader))
+  inputs, labels = inputs.to(device), labels.to(device)
+  outputs = model(inputs)
+
+  print("Predicted classes", outputs.argmax(-1))
+  print("Actual classes", labels)
 
 
 if __name__=='__main__':
