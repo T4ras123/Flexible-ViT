@@ -22,11 +22,13 @@ class Compose(object):
   def __init__(self, transforms):
     self.transforms = transforms
     
+    
   def __call__(self, image):
     for t in self.transforms:
       image = t(image)
       
     return image
+  
   
 def show_img(images, num_samples=20, columns=4):
   plt.figure(figsize=(15,15))
@@ -36,7 +38,7 @@ def show_img(images, num_samples=20, columns=4):
       plt.subplot(int(num_samples/columns)+1, columns, int(i/idx)+1)
       plt.imshow(to_pil_image(img[0]))
   
-print("data")
+
 dataset = OxfordIIITPet(root=".", download=True, transform=Compose(to_tensor))
 
 train_split = int(0.8 * len(dataset))
@@ -44,7 +46,7 @@ train, test = random_split(dataset, [train_split, len(dataset) - train_split])
 
 train_dataloader = DataLoader(train, batch_size=32, shuffle=True)
 test_dataloader = DataLoader(test, batch_size=32, shuffle=True)
-print("loader")
+
 
 
 class PatchEmbedding(nn.Module):
@@ -62,7 +64,6 @@ class PatchEmbedding(nn.Module):
 
 
 class Block(nn.Module):
-    
     def __init__(self, emb_dim=32) -> None:
         super().__init__()
         self.sa = Attention()
@@ -90,12 +91,14 @@ class Attention(nn.Module):
     self.v = nn.Linear(dim, dim)
     self.k = nn.Linear(dim, dim)
     
+  
   def forward(self, x):
     q = self.q(x)
     v = self.v(x)
     k = self.k(x)
     attn_output, _ = self.att(q, k, v)
     return attn_output
+
 
 class FeedForward(nn.Sequential):
     def __init__(self, dim=32, hidden_dim=128, dropout = 0.):
@@ -142,6 +145,7 @@ class ViT(nn.Module):
 
 def main():
   parser = argparse.ArgumentParser()
+  parser.add_argument('--data_path', type=str, default='.', help='Path to the data')
   parser.add_argument('-ch', '--channels', type=int, default=3, help='Number of channels in the input image')
   parser.add_argument('-ims', '--image_size', type=int, default=144, help='Size of the input image')
   parser.add_argument('-ps', '--patch_size', type=int, default=4, help='Size of the patch')
@@ -157,10 +161,11 @@ def main():
   model = ViT(args.channels, args.image_size, args.patch_size, args.emb_dim, args.n_layers, args.out_dim, args.dropout, args.heads).to(device)
   optimizer = optim.AdamW(model.parameters(), lr=args.learning_rate)
   criterion = nn.CrossEntropyLoss()
-  print("main")
+  
   for epoch in range(args.epochs):
       epoch_losses = []
       model.train()
+      
       for step, (inputs, labels) in enumerate(train_dataloader):
           inputs, labels = inputs.to(device), labels.to(device)
           optimizer.zero_grad()
@@ -173,12 +178,15 @@ def main():
       if epoch % 5 == 0:
           print(f">>> Epoch {epoch} train loss: ", np.mean(epoch_losses))
           epoch_losses = []
+          
           for step, (inputs, labels) in enumerate(test_dataloader):
               inputs, labels = inputs.to(device), labels.to(device)
               outputs = model(inputs)
               loss = criterion(outputs, labels)
               epoch_losses.append(loss.item())
+              
           print(f">>> Epoch {epoch} test loss: ", np.mean(epoch_losses))
+          
   inputs, labels = next(iter(test_dataloader))
   inputs, labels = inputs.to(device), labels.to(device)
   outputs = model(inputs)
