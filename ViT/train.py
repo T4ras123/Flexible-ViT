@@ -154,8 +154,6 @@ def main():
             loss.backward()
             optimizer.step()
             epoch_losses.append(loss.item())
-            print(loss)
-            break
         
         if epoch % 5 == 0:
             print(f">>> Epoch {epoch} train loss: ", np.mean(epoch_losses))
