@@ -13,6 +13,8 @@ from torch.utils.data import random_split
 import torch.optim as optim
 import numpy as np
 import argparse
+import os
+from datetime import datetime
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 to_tensor = [Resize((144,144)), ToTensor()]
@@ -47,6 +49,31 @@ train, test = random_split(dataset, [train_split, len(dataset) - train_split])
 train_dataloader = DataLoader(train, batch_size=32, shuffle=True)
 test_dataloader = DataLoader(test, batch_size=32, shuffle=True)
 
+
+def save_model(model, optimizer, epoch, loss, path="ViT/models"):
+    """Save model checkpoint with timestamp."""
+    os.makedirs(path, exist_ok=True)
+    
+    checkpoint = {
+        'epoch': epoch,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': loss,
+    }
+    
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'vit_checkpoint_epoch{epoch}_{timestamp}.pt'
+    filepath = os.path.join(path, filename)
+    
+    torch.save(checkpoint, filepath)
+    print(f"Model saved to {filepath}")
+
+def load_model(model, optimizer, checkpoint_path):
+    """Load model from checkpoint."""
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    return checkpoint['epoch'], checkpoint['loss']
 
 
 class PatchEmbedding(nn.Module):
@@ -175,9 +202,11 @@ def main():
           optimizer.step()
           epoch_losses.append(loss.item())
       
-      if epoch % 5 == 0:
+      if epoch % 10 == 0:
           print(f">>> Epoch {epoch} train loss: ", np.mean(epoch_losses))
           epoch_losses = []
+          avg_loss = np.mean(epoch_losses)
+          save_model(model, optimizer, epoch, avg_loss)
           
           for step, (inputs, labels) in enumerate(test_dataloader):
               inputs, labels = inputs.to(device), labels.to(device)
@@ -185,6 +214,8 @@ def main():
               loss = criterion(outputs, labels)
               epoch_losses.append(loss.item())
               
+          avg_loss = np.mean(epoch_losses)
+          save_model(model, optimizer, epoch, avg_loss)   
           print(f">>> Epoch {epoch} test loss: ", np.mean(epoch_losses))
           
   inputs, labels = next(iter(test_dataloader))
