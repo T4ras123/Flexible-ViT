@@ -203,20 +203,20 @@ def main():
           epoch_losses.append(loss.item())
       
       if epoch % 10 == 0:
-          print(f">>> Epoch {epoch} train loss: ", np.mean(epoch_losses))
+          print(f">>> Epoch {epoch} train loss: ", torch.mean(epoch_losses))
           epoch_losses = []
-          avg_loss = np.mean(epoch_losses)
+          avg_loss = torch.mean(epoch_losses)
           save_model(model, optimizer, epoch, avg_loss)
           
-          for step, (inputs, labels) in enumerate(test_dataloader):
+          for _ , (inputs, labels) in enumerate(test_dataloader):
               inputs, labels = inputs.to(device), labels.to(device)
               outputs = model(inputs)
               loss = criterion(outputs, labels)
               epoch_losses.append(loss.item())
               
-          avg_loss = np.mean(epoch_losses)
+          avg_loss = torch.mean(epoch_losses)
           save_model(model, optimizer, epoch, avg_loss)   
-          print(f">>> Epoch {epoch} test loss: ", np.mean(epoch_losses))
+          print(f">>> Epoch {epoch} test loss: ", torch.mean(epoch_losses))
           
   inputs, labels = next(iter(test_dataloader))
   inputs, labels = inputs.to(device), labels.to(device)
