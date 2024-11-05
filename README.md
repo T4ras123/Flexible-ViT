@@ -63,6 +63,7 @@ python train.py \
 #### Available Arguments
 
 - `--data_path`: Path to the dataset.
+- `--weights` : Path to the weights
 - `--epochs`: Number of training epochs.
 - `--learning_rate`: Learning rate for the optimizer.
 - `--batch_size`: Number of samples per batch.
