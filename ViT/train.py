@@ -11,7 +11,6 @@ from einops import repeat
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 import torch.optim as optim
-import numpy as np
 import argparse
 import os
 from datetime import datetime
