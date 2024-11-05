@@ -188,6 +188,8 @@ def main():
   optimizer = optim.AdamW(model.parameters(), lr=args.learning_rate)
   criterion = nn.CrossEntropyLoss()
   
+  print(f'{torch.cuda.get_device_name()} is ready and working')
+  
   for epoch in range(args.epochs):
       epoch_losses = []
       model.train()
