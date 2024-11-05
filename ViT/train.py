@@ -173,6 +173,7 @@ class ViT(nn.Module):
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--data_path', type=str, default='.', help='Path to the data')
+  parser.add_argument('--weights', default=None, help='Path to the model weights')
   parser.add_argument('-ch', '--channels', type=int, default=3, help='Number of channels in the input image')
   parser.add_argument('-ims', '--image_size', type=int, default=144, help='Size of the input image')
   parser.add_argument('-ps', '--patch_size', type=int, default=4, help='Size of the patch')
@@ -188,6 +189,9 @@ def main():
   model = ViT(args.channels, args.image_size, args.patch_size, args.emb_dim, args.n_layers, args.out_dim, args.dropout, args.heads).to(device)
   optimizer = optim.AdamW(model.parameters(), lr=args.learning_rate)
   criterion = nn.CrossEntropyLoss()
+  
+  if args.weights is not None:
+      load_model(model, optimizer, args.weights)    
   
   print(f'{torch.cuda.get_device_name()} is ready and working')
   
