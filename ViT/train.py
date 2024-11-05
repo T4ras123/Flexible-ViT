@@ -4,7 +4,6 @@ from einops.layers.torch import Rearrange
 from torch import Tensor
 from torchvision.datasets import OxfordIIITPet
 import matplotlib.pyplot as plt
-from random import random
 from torchvision.transforms import Resize, ToTensor
 from torchvision.transforms.functional import to_pil_image
 from einops import repeat
