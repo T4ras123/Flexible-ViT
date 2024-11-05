@@ -217,7 +217,6 @@ def main():
               epoch_losses.append(loss.item())
               
           avg_loss = np.mean(epoch_losses)
-          save_model(model, optimizer, epoch, avg_loss)   
           print(f">>> Epoch {epoch} test loss: ", np.mean(epoch_losses))
           
   inputs, labels = next(iter(test_dataloader))
