@@ -14,6 +14,7 @@ import torch.optim as optim
 import argparse
 import os
 from datetime import datetime
+import numpy as np
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 to_tensor = [Resize((144,144)), ToTensor()]
@@ -180,7 +181,7 @@ def main():
   parser.add_argument('-od', '--out_dim', type=int, default=37, help='Output dimension')
   parser.add_argument('-dr', '--dropout', type=float, default=0.1, help='Dropout')
   parser.add_argument('-nh', '--heads', type=int, default=2, help='Number of heads')
-  parser.add_argument('-lr', '--learning_rate', type=float, default=0.001, help='Learning rate')
+  parser.add_argument('-lr', '--learning_rate', type=float, default=1e-3, help='Learning rate')
   parser.add_argument('--epochs', type=int, default=1000, help='Number of epochs')
   args = parser.parse_args()
   
@@ -204,9 +205,9 @@ def main():
           epoch_losses.append(loss.item())
       
       if epoch % 10 == 0:
-          print(f">>> Epoch {epoch} train loss: ", torch.mean(epoch_losses))
+          print(f">>> Epoch {epoch} train loss: ", np.mean(epoch_losses))
           epoch_losses = []
-          avg_loss = torch.mean(epoch_losses)
+          avg_loss = np.mean(epoch_losses)
           save_model(model, optimizer, epoch, avg_loss)
           
           for _ , (inputs, labels) in enumerate(test_dataloader):
@@ -215,9 +216,9 @@ def main():
               loss = criterion(outputs, labels)
               epoch_losses.append(loss.item())
               
-          avg_loss = torch.mean(epoch_losses)
+          avg_loss = np.mean(epoch_losses)
           save_model(model, optimizer, epoch, avg_loss)   
-          print(f">>> Epoch {epoch} test loss: ", torch.mean(epoch_losses))
+          print(f">>> Epoch {epoch} test loss: ", np.mean(epoch_losses))
           
   inputs, labels = next(iter(test_dataloader))
   inputs, labels = inputs.to(device), labels.to(device)
