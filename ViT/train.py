@@ -192,7 +192,7 @@ def main():
       epoch_losses = []
       model.train()
       
-      for step, (inputs, labels) in enumerate(train_dataloader):
+      for _, (inputs, labels) in enumerate(train_dataloader):
           inputs, labels = inputs.to(device), labels.to(device)
           optimizer.zero_grad()
           outputs = model(inputs)
