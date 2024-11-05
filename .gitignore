@@ -3,7 +3,7 @@
 /tiny-imagenet-200
 scratch.ipynb
 notebooks/oxford-iiit-pet/*
-oxford-iiit-pet/*
+oxford-iiit-pet/
 vision_transformer.egg
 
 
